@@ -1,0 +1,245 @@
+---
+title: "Trends in cancer incidence, survival and mortality"
+output: html_document
+---
+
+
+```{r echo = FALSE, message=FALSE}
+library(ggplot2)
+library(plotly)
+library(tidyverse)
+library(ggpubr)
+
+load("~/DJGRAIL/data/data_inc_2001to2020_C0toC97_allageandbysex.rda")
+load("~/DJGRAIL/data/data_mort_2001to2020_C0toC97_allageandbysex.rda")
+
+load("~/DJGRAIL/data/data_inc_2001to2020_C0toC97_allandbyagesex.rda")
+load("~/DJGRAIL/data/data_mort_2001to2020_C0toC97_allandbyagesex.rda")
+
+load("~/DJGRAIL/data/data_inc_2001to2020_bysite_allandbysex.rda")
+load("~/DJGRAIL/data/data_mort_2001to2020_bysite_allandbysex.rda")
+
+```
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+# Key publication and data sources
+
+
+## Cancer registrations statistics, England (NHS Digital) and CancerData
+
+
+[Produced yearly](https://digital.nhs.uk/data-and-information/publications/statistical/cancer-registration-statistics) [(historic link)](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases/bulletins/cancerregistrationstatisticsengland/previousReleases). Provides cancer registration statistics for England on cancer **incidence** and **mortality** by cancer site, age and gender. Further data is provided in CancerData’s incidence and mortality [dashboard](https://www.cancerdata.nhs.uk/incidence_and_mortality). Below, incidence and mortality data from CancerData  statistics have been downloaded and plotted (with some interaction!). The most recent year of data, 2020, is of course is heavily impacted by COVID 19.
+
+
+###  Trends in incidence and mortality from 2001 to 2020 for all cancer sites (C0 to C97) combined
+
+#### Age-standardised incidence rates from 2001 to 2020 for all cancer sites (C0 to C97) combined, stratified by sex
+
+
+```{r echo = FALSE, message=FALSE}
+
+temp_inc <- data_inc_2001to2020_C0toC97_allageandbysex %>%
+        filter(Type_of_rate == "Age-standardised") %>%
+        pivot_wider(names_from = Gender, values_from = c(Count, Rate, LCI, UCI))
+
+ggplotly(ggplot(temp_inc, aes(x=Year)) + 
+  geom_line(aes(y = Rate_Persons), color = "darkred") + 
+  geom_line(aes(y = LCI_Persons), color="red", linetype="twodash") +
+  geom_line(aes(y = UCI_Persons), color="red", linetype="twodash") +
+  geom_line(aes(y = Rate_Male), color = "blue") + 
+  geom_line(aes(y = LCI_Male), color="steelblue", linetype="twodash") +
+  geom_line(aes(y = UCI_Male), color="steelblue", linetype="twodash") +
+  geom_line(aes(y = Rate_Female), color = "green") + 
+  geom_line(aes(y = LCI_Female), color="darkgreen", linetype="twodash") +
+  geom_line(aes(y = UCI_Female), color="darkgreen", linetype="twodash") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")),
+  height = 800, width=800) 
+
+```
+
+#### Age-standardised mortality rates from 2001 to 2020 for all cancer sites (C0 to C97) combined, stratified by sex
+
+```{r echo = FALSE, message=FALSE}
+
+temp_mort <- data_mort_2001to2020_C0toC97_allageandbysex %>%
+        filter(Type_of_rate == "Age-standardised") %>%
+        pivot_wider(names_from = Gender, values_from = c(Count, Rate, LCI, UCI))
+
+ggplotly(ggplot(temp_mort, aes(x=Year)) + 
+  geom_line(aes(y = Rate_Persons), color = "darkred") + 
+  geom_line(aes(y = LCI_Persons), color="red", linetype="twodash") +
+  geom_line(aes(y = UCI_Persons), color="red", linetype="twodash") +
+  geom_line(aes(y = Rate_Male), color = "blue") + 
+  geom_line(aes(y = LCI_Male), color="steelblue", linetype="twodash") +
+  geom_line(aes(y = UCI_Male), color="steelblue", linetype="twodash") +
+  geom_line(aes(y = Rate_Female), color = "green") + 
+  geom_line(aes(y = LCI_Female), color="darkgreen", linetype="twodash") +
+  geom_line(aes(y = UCI_Female), color="darkgreen", linetype="twodash") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")),
+  height = 800, width=800) 
+
+```
+
+#### Annual percentage change in **incidence** from 2001 to 2020 for all cancer sites (C0 to C97) combined, **Males**
+
+```{r echo = FALSE, message=FALSE}
+
+temp_inc <- data_inc_2001to2020_C0toC97_allandbyagesex %>% 
+        group_by(Gender, Age_at_Diagnosis) %>%
+        arrange(Year, .by_group = TRUE) %>%
+        mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
+        filter(Age_at_Diagnosis != "All ages")
+        
+ggplotly(ggbarplot(temp_inc %>% 
+                        filter(grepl(c("Male"), Gender)), 
+                y = "pct_change", x = "Year") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")) +
+  theme(legend.position ="bottom") +
+          facet_wrap(vars(Age_at_Diagnosis), ncol = 2),
+  height = 2000, width=800)
+
+
+```
+
+#### Annual percentage change in **incidence** from 2001 to 2020 for all cancer sites (C0 to C97) combined, **Females**
+
+```{r echo = FALSE, message=FALSE}
+
+temp_inc <- data_inc_2001to2020_C0toC97_allandbyagesex %>% 
+        group_by(Gender, Age_at_Diagnosis) %>%
+        arrange(Year, .by_group = TRUE) %>%
+        mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
+        filter(Age_at_Diagnosis != "All ages")
+        
+ggplotly(ggbarplot(temp_inc %>% 
+                        filter(grepl(c("Female"), Gender)), 
+                y = "pct_change", x = "Year") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")) +
+  theme(legend.position ="bottom") +
+          facet_wrap(vars(Age_at_Diagnosis), ncol = 2),
+  height = 2000, width=800)
+
+
+```
+
+#### Annual percentage change in **mortality** from 2001 to 2020 for all cancer sites (C0 to C97) combined, **Males**
+
+```{r echo = FALSE, message=FALSE}
+
+temp_mort <- data_mort_2001to2020_C0toC97_allandbyagesex %>% 
+        group_by(Gender, Age_at_Diagnosis) %>%
+        arrange(Year, .by_group = TRUE) %>%
+        mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
+        filter(Age_at_Diagnosis != "All ages")
+        
+ggplotly(ggbarplot(temp_mort %>% 
+                        filter(grepl(c("Male"), Gender)), 
+                y = "pct_change", x = "Year") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")) +
+  theme(legend.position ="bottom") +
+          facet_wrap(vars(Age_at_Diagnosis), ncol = 2),
+  height = 2000, width=800)
+
+
+```
+
+#### Annual percentage change in **mortality** from 2001 to 2020 for all cancer sites (C0 to C97) combined, **Females**
+
+```{r echo = FALSE, message=FALSE}
+
+temp_mort <- data_mort_2001to2020_C0toC97_allandbyagesex %>% 
+        group_by(Gender, Age_at_Diagnosis) %>%
+        arrange(Year, .by_group = TRUE) %>%
+        mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
+        filter(Age_at_Diagnosis != "All ages")
+        
+ggplotly(ggbarplot(temp_mort %>% 
+                        filter(grepl(c("Female"), Gender)), 
+                y = "pct_change", x = "Year") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")) +
+  theme(legend.position ="bottom") +
+          facet_wrap(vars(Age_at_Diagnosis), ncol = 2),
+  height = 2000, width=800)
+
+
+```
+
+###  Trends in incidence and mortality from 2001 to 2020 by cancer site
+
+
+```{r echo = FALSE, message=FALSE}
+
+temp_inc <- data_inc_2001to2020_bysite_allandbysex %>% 
+        group_by(Gender, Age_at_Diagnosis) %>%
+        arrange(Year, .by_group = TRUE) %>%
+        mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
+        filter(Age_at_Diagnosis != "All ages")
+        
+ggplotly(ggbarplot(temp_inc %>% 
+                        filter(grepl(c("Male"), Gender)), 
+                y = "pct_change", x = "Year") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12)) +
+  xlab("Year") +
+  ylab("ASR per 100,000") +
+  theme(strip.background =element_rect(fill="white")) +
+  theme(legend.position ="bottom") +
+          facet_wrap(vars(Age_at_Diagnosis), ncol = 2),
+  height = 2000, width=800)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+The following note is attached to the data from CancerData
+
+*An incident case of cancer is a new case of cancer, counted once when the cancer is diagnosed.*
+
+*Incident cases of cancer are counted for each separate primary tumour. One person may be diagnosed with more than one tumour, and would then appear twice in the incidence statistics. Recurrences of a previous cancer are not counted as new incident cases.*
+
+*Cancer mortality estimates show the numbers of people who died as a result of cancer. It does not include people who were diagnosed with cancer but died from an unrelated cause of death.*
+
+*Standardised rates for England are standardised according to 2013 European Standard Population (ESP). Standardised rates for sub-Integrated Care Board locations (sub-ICBLs) are standardised according to an approximate 2013 European Standard Population. This approximation is created by grouping the five year age bands in the ESP into the 5 age bands published on this tool.*
+
+*Data presented are taken from the National Cancer Registration Service Cancer Analysis System, snapshot CAS2210.*
+
+
+
+
+
+

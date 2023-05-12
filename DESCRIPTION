@@ -1,0 +1,30 @@
+Package: DJGRAIL
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: person(given = "David",
+           family = "Jones",
+           email = "david.jona.jones@gmail.com",
+           role = c("aut", "cre"))
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: Functions and analyses
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Depends:
+    dplyr,
+    tidyr,
+    ggplot2,
+    plotly,
+    data.table,
+    foreach,
+    doParallel,
+    png,
+    flexsurv,
+    rstatix,
+    ggpubr,
+    survHE,
+    zoo,
+    ggExtra,
+    R (>= 2.10)
+
