@@ -27,6 +27,9 @@ load("~/GRAIL_HE/data/data_mort_2001to2020_C0toC97_allandbyagesex.rda")
 load("~/GRAIL_HE/data/data_inc_2001to2020_bysite_allandbysex.rda")
 load("~/GRAIL_HE/data/data_mort_2001to2020_bysite_allandbysex.rda")
 
+load("~/GRAIL_HE/data/data_mort_2001to2020_bysite_allandbysex.rda")
+
+
 ```
 
 <br>
@@ -71,7 +74,7 @@ ggplotly(ggplot(temp_inc, aes(x=Year)) +
 
 <br>
 
-###  Annual percentage change in **incidence** from 2001 to 2020 for all cancer sites (C0 to C97) combined
+###  Annual percentage change in **incidence** from 2001 to 2020 for all cancer sites (C0 to C97) combined, by age
 
 ### **Females** Select age group {.tabset .tabset-dropdown}
 
@@ -500,7 +503,10 @@ ggplotly(ggplot(temp_mort, aes(x=Year)) +
 
 <br>
 
-### Annual percentage change in **mortality** from 2001 to 2020 for all cancer sites (C0 to C97) combined, **Males**
+
+###  Annual percentage change in **mortality** from 2001 to 2020 for all cancer sites (C0 to C97) combined, by age
+
+### **Females** Select age group {.tabset .tabset-dropdown}
 
 ```{r}
 
@@ -508,11 +514,15 @@ temp_mort <- data_mort_2001to2020_C0toC97_allandbyagesex %>%
         group_by(Gender, Age_at_Diagnosis) %>%
         arrange(Year, .by_group = TRUE) %>%
         mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
-        filter(Age_at_Diagnosis != "All ages")
+        filter(Age_at_Diagnosis != "All ages") %>%
+        filter(grepl(c("Female"), Gender))
+
+
+names_plotagemort_list <- levels(factor(temp_mort$Age_at_Diagnosis))
         
-ggplotly(ggbarplot(temp_mort %>% 
-                        filter(grepl(c("Male"), Gender)), 
-                y = "pct_change", x = "Year") +
+l_temp_mort <- temp_mort %>% group_split(ICD10_descrip)
+
+plots <- map(l_temp_mort, ~ ggplotly(ggbarplot(.x, y = "pct_change", x = "Year") +
   theme_bw() +
   theme(strip.text = element_text(size = 12)) +
   xlab("Year") +
@@ -520,26 +530,106 @@ ggplotly(ggbarplot(temp_mort %>%
   theme(strip.background =element_rect(fill="white")) +
   theme(legend.position ="bottom") +
           facet_wrap(vars(Age_at_Diagnosis), ncol = 3),
-  height = 2000, width=800)
+  height = 300, width=800))
+
+names(plots) = names_plotagemort_list
 
 
 ```
 
-<br>
 
-### Annual percentage change in **mortality** from 2001 to 2020 for all cancer sites (C0 to C97) combined, **Females**
+#### 20 to 24
+```{r, echo = FALSE}
+plots[[1]]
+```
+
+#### 25 to 29
+```{r, echo = FALSE}
+plots[[2]]
+```
+
+#### 30 to 34
+```{r, echo = FALSE}
+plots[[3]]
+```
+
+#### 35 to 39
+```{r, echo = FALSE}
+plots[[4]]
+```
+
+#### 40 to 44
+```{r, echo = FALSE}
+plots[[5]]
+```
+
+#### 45 to 49
+```{r, echo = FALSE}
+plots[[6]]
+```
+
+#### 50 to 54
+```{r, echo = FALSE}
+plots[[7]]
+```
+
+#### 55 to 59
+```{r, echo = FALSE}
+plots[[8]]
+```
+
+#### 60 to 64
+```{r, echo = FALSE}
+plots[[9]]
+```
+
+#### 65 to 69
+```{r, echo = FALSE}
+plots[[10]]
+```
+
+#### 70 to 74
+```{r, echo = FALSE}
+plots[[11]]
+```
+
+#### 75 to 79
+```{r, echo = FALSE}
+plots[[12]]
+```
+
+#### 80 to 84
+```{r, echo = FALSE}
+plots[[13]]
+```
+
+#### 85 to 89
+```{r, echo = FALSE}
+plots[[14]]
+```
+
+#### 90 and over
+```{r, echo = FALSE}
+plots[[15]]
+```
+
+### **Males** Select age group {.tabset .tabset-dropdown}
 
 ```{r}
 
-temp_mort <- data_mort_2001to2020_C0toC97_allandbyagesex %>% 
+temp_inc <- data_mort_2001to2020_C0toC97_allandbyagesex %>% 
         group_by(Gender, Age_at_Diagnosis) %>%
         arrange(Year, .by_group = TRUE) %>%
         mutate(pct_change = (Rate/lag(Rate) - 1) * 100) %>%
-        filter(Age_at_Diagnosis != "All ages")
+        filter(Age_at_Diagnosis != "All ages") %>%
+        filter(grepl(c("Male"), Gender))
+
+
+names_plotagemort_list <- levels(factor(temp_mort$Age_at_Diagnosis))
         
-ggplotly(ggbarplot(temp_mort %>% 
-                        filter(grepl(c("Female"), Gender)), 
-                y = "pct_change", x = "Year") +
+l_temp_mort <- temp_mort %>% group_split(ICD10_descrip)
+
+plots <- map(l_temp_mort, ~ ggplotly(ggbarplot(.x, y = "pct_change", x = "Year") +
   theme_bw() +
   theme(strip.text = element_text(size = 12)) +
   xlab("Year") +
@@ -547,9 +637,87 @@ ggplotly(ggbarplot(temp_mort %>%
   theme(strip.background =element_rect(fill="white")) +
   theme(legend.position ="bottom") +
           facet_wrap(vars(Age_at_Diagnosis), ncol = 3),
-  height = 2000, width=800)
+  height = 300, width=800))
+
+names(plots) = names_plotagemort_list
 
 
+```
+
+
+#### 20 to 24
+```{r, echo = FALSE}
+plots[[1]]
+```
+
+#### 25 to 29
+```{r, echo = FALSE}
+plots[[2]]
+```
+
+#### 30 to 34
+```{r, echo = FALSE}
+plots[[3]]
+```
+
+#### 35 to 39
+```{r, echo = FALSE}
+plots[[4]]
+```
+
+#### 40 to 44
+```{r, echo = FALSE}
+plots[[5]]
+```
+
+#### 45 to 49
+```{r, echo = FALSE}
+plots[[6]]
+```
+
+#### 50 to 54
+```{r, echo = FALSE}
+plots[[7]]
+```
+
+#### 55 to 59
+```{r, echo = FALSE}
+plots[[8]]
+```
+
+#### 60 to 64
+```{r, echo = FALSE}
+plots[[9]]
+```
+
+#### 65 to 69
+```{r, echo = FALSE}
+plots[[10]]
+```
+
+#### 70 to 74
+```{r, echo = FALSE}
+plots[[11]]
+```
+
+#### 75 to 79
+```{r, echo = FALSE}
+plots[[12]]
+```
+
+#### 80 to 84
+```{r, echo = FALSE}
+plots[[13]]
+```
+
+#### 85 to 89
+```{r, echo = FALSE}
+plots[[14]]
+```
+
+#### 90 and over
+```{r, echo = FALSE}
+plots[[15]]
 ```
 
 <br>
@@ -729,6 +897,11 @@ kable(data_mort_2001to2020_bysite_allandbysex %>%
 <br>
 
 ## Survival
+
+```{r}
+
+
+
 
 The following note is attached to the data from CancerData
 
